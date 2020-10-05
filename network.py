@@ -8,18 +8,24 @@ from connection import Connection
 
 class Network:
 
-    def __init__(self, num_inputs, num_outputs):
+    def __init__(self, num_inputs, num_outputs, replication=False):
+
+        self.num_inputs = num_inputs
+        self.num_outputs = num_outputs
 
         self.bias = Bias()
-        self.input_nodes = [Input() for _ in range(num_inputs)]
-        self.output_nodes = [Output() for _ in range(num_outputs)]
-
-        self.nodes_list = list()
-        self.nodes_list.extend(self.input_nodes)
-        self.nodes_list.extend(self.output_nodes)
+        self.input_nodes = list()
+        self.output_nodes = list()
+        self.hidden_nodes = list()
 
         self.splitable_connections = set()
 
+        if not replication: self.create_initial_connections()
+
+
+    def create_initial_connections(self):
+        self.input_nodes = [Input() for _ in range(self.num_inputs)]
+        self.output_nodes = [Output() for _ in range(self.num_outputs)]
         for out_node in self.output_nodes:
             out_node.add_connection(Connection(self.bias, out_node))
             for in_node in self.input_nodes:
@@ -28,10 +34,16 @@ class Network:
                 self.splitable_connections.add(connection)
 
 
+    def reset(self):
+        [node.reset() for node in self.input_nodes]
+        [node.reset() for node in self.hidden_nodes]
+        [node.reset() for node in self.output_nodes]
+
+
     def forward(self, inputs):
 
         # Reset all nodes
-        [node.reset() for node in self.nodes_list]
+        self.reset()
 
         # Set Inputs
         [node.set_input(inputs[i]) for i, node in enumerate(self.input_nodes)]
@@ -54,7 +66,7 @@ class Network:
 
         # Create new Hidden node
         new_node = Hidden()
-        self.nodes_list.append(new_node)
+        self.hidden_nodes.append(new_node)
 
         first_connection = Connection(input_node, new_node)
         self.splitable_connections.add(first_connection)
@@ -74,10 +86,11 @@ class Network:
     def add_connection(self):
 
         input_layer = self.calibrate_layers()
+        all_nodes = self.input_nodes + self.hidden_nodes + self.output_nodes
 
         for i in range(10):
 
-            in_node, out_node = random.sample(self.nodes_list, 2)
+            in_node, out_node = random.sample(all_nodes, 2)
             if out_node.get_layer() < in_node.get_layer(): in_node, out_node = out_node, in_node
 
             # Can't connect to an input node
@@ -86,7 +99,6 @@ class Network:
                 # Can't connect if connection already exists
                 if not out_node.is_connected_to(in_node):
 
-                    print(in_node.number, in_node.layer, "->", out_node.number, out_node.layer)
                     new_connection = Connection(in_node, out_node)
                     self.splitable_connections.add(new_connection)
                     out_node.add_connection(new_connection)
@@ -96,7 +108,7 @@ class Network:
     def calibrate_layers(self):
 
         # Reset all nodes
-        [node.reset() for node in self.nodes_list]
+        self.reset()
 
         for out_node in self.output_nodes:
             out_node.backward(0)
@@ -107,6 +119,58 @@ class Network:
         return true_input_layer
 
 
+    def replicate(self):
+
+        copy = Network(self.num_inputs, self.num_outputs, replication=True)
+
+        innovation_number_to_node = {0 : copy.bias}
+
+        # Copy Input Nodes
+        for node in self.input_nodes:
+            node_copy = node.replicate()
+            copy.input_nodes.append(node_copy)
+            innovation_number_to_node[node_copy.number] = node_copy
+
+        # Copy Hidden Nodes
+        for node in self.hidden_nodes:
+            node_copy = node.replicate()
+            copy.hidden_nodes.append(node_copy)
+            innovation_number_to_node[node_copy.number] = node_copy
+
+        # Copy Output Nodes
+        for node in self.output_nodes:
+            node_copy = node.replicate()
+            copy.output_nodes.append(node_copy)
+            innovation_number_to_node[node_copy.number] = node_copy
+
+        # Copy Connections
+        for out_node in self.hidden_nodes + self.output_nodes:
+            node_copy = innovation_number_to_node[out_node.number]
+
+            for connection in out_node.connections:
+
+                input_node_copy = innovation_number_to_node[connection.input_node.number]
+                output_node_copy = innovation_number_to_node[connection.output_node.number]
+
+                connection_copy = Connection(input_node_copy, output_node_copy)
+                connection_copy.enabled = connection.enabled
+                connection_copy.weight = connection.weight
+
+                node_copy.add_connection(connection_copy)
+
+                if connection in self.splitable_connections:
+                    copy.splitable_connections.add(connection_copy)
+
+        return copy
+
+
+
+
+
+
+
+
+
 
 
 
@@ -114,11 +178,13 @@ class Network:
 
 if __name__ == '__main__':
     net = Network(3, 1)
-    net.add_node()
-    net.calibrate_layers()
-    net.add_connection()
-    net.calibrate_layers()
-    print(net.forward([0, 0, 0]))
+
+    for i in range(20):
+        net.add_node()
+        net.add_connection()
+    copy = net.replicate()
+    print(net.forward([1, 1, 1]))
+    print(copy.forward([1, 1, 1]))
 
 
 
