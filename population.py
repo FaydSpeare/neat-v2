@@ -12,7 +12,7 @@ class Population:
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
         self.population_size = population_size
-
+        self.generation = 0
         self.population = None
         self.species = list()
 
@@ -51,9 +51,8 @@ class Population:
             # Create new species
             else: self.species.append(Species(organism))
 
+        # Remove any species without organisms
         self.species = [species for species in self.species if species.organisms]
-
-        #assert all(len(species.organisms) > 0 for species in self.species)
 
 
     def cull_species(self):
@@ -67,12 +66,19 @@ class Population:
         self.cull_species()
         self.share_fitness()
 
+        # Remove stale species
+
+        # Remove any species that don't get offspring
+
+        # Populate Offspring
+
+        self.generation += 1
 
 
 if __name__ == '__main__':
     start = time.time()
     population = Population(2, 1, Organism, 100)
-    for i in range(3):
+    for i in range(100):
         population.next()
     print(time.time() - start)
     print()
