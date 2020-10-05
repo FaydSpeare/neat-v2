@@ -18,6 +18,8 @@ class Network:
         self.output_nodes = list()
         self.hidden_nodes = list()
 
+        self.bias_connections = list()
+        self.connections = list()
         self.splitable_connections = set()
 
         if not replication: self.create_initial_connections()
@@ -27,9 +29,12 @@ class Network:
         self.input_nodes = [Input() for _ in range(self.num_inputs)]
         self.output_nodes = [Output() for _ in range(self.num_outputs)]
         for out_node in self.output_nodes:
-            out_node.add_connection(Connection(self.bias, out_node))
+            bias_connection = Connection(self.bias, out_node)
+            self.bias_connections.append(bias_connection)
+            out_node.add_connection(bias_connection)
             for in_node in self.input_nodes:
                 connection = Connection(in_node, out_node)
+                self.connections.append(connection)
                 out_node.add_connection(connection)
                 self.splitable_connections.add(connection)
 
@@ -69,13 +74,16 @@ class Network:
         self.hidden_nodes.append(new_node)
 
         first_connection = Connection(input_node, new_node)
+        self.connections.append(first_connection)
         self.splitable_connections.add(first_connection)
         first_connection.set_weight(1)
 
         second_connection = Connection(new_node, output_node)
+        self.connections.append(second_connection)
         self.splitable_connections.add(second_connection)
 
         bias_connection = Connection(self.bias, new_node)
+        self.bias_connections.append(bias_connection)
 
         # Add new connections to nodes
         new_node.add_connection(first_connection)
@@ -100,6 +108,7 @@ class Network:
                 if not out_node.is_connected_to(in_node):
 
                     new_connection = Connection(in_node, out_node)
+                    self.connections.append(new_connection)
                     self.splitable_connections.add(new_connection)
                     out_node.add_connection(new_connection)
                     break
@@ -152,7 +161,7 @@ class Network:
                 input_node_copy = innovation_number_to_node[connection.input_node.number]
                 output_node_copy = innovation_number_to_node[connection.output_node.number]
 
-                connection_copy = Connection(input_node_copy, output_node_copy)
+                connection_copy = Connection(input_node_copy, output_node_copy, number=connection.number)
                 connection_copy.enabled = connection.enabled
                 connection_copy.weight = connection.weight
 
@@ -161,7 +170,19 @@ class Network:
                 if connection in self.splitable_connections:
                     copy.splitable_connections.add(connection_copy)
 
+                if input_node_copy.number == 0:
+                    copy.bias_connections.append(connection_copy)
+                else:
+                    copy.connections.append(connection_copy)
+
         return copy
+
+
+    def full_weight_mutation(self):
+        for connection in self.connections + self.bias_connections:
+            connection.init_weight()
+
+
 
 
 

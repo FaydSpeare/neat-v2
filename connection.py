@@ -5,12 +5,13 @@ connection_innovation_counter = itertools.count()
 
 class Connection:
 
-    def __init__(self, input_node, output_node):
+    def __init__(self, input_node, output_node, number=None):
         self.input_node = input_node
         self.output_node = output_node
-        self.innovation_number = next(connection_innovation_counter)
-        self.weight = random.gauss(0, 1)
+        self.number = next(connection_innovation_counter) if number is None else number
+        self.weight = None
         self.enabled = True
+        self.init_weight()
 
     def get_output(self):
         return self.input_node.get_output() * self.weight if self.enabled else 0.
@@ -29,3 +30,6 @@ class Connection:
 
     def backward(self, layer):
         self.input_node.backward(layer - 1)
+
+    def init_weight(self):
+        self.weight = random.gauss(0, 1)
