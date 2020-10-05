@@ -166,22 +166,13 @@ class Network:
 
 
 
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
-    net = Network(3, 1)
+    net = Network(3, 80)
 
     for i in range(20):
         net.add_node()
         net.add_connection()
+
     copy = net.replicate()
     print(net.forward([1, 1, 1]))
     print(copy.forward([1, 1, 1]))
