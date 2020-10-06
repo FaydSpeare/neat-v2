@@ -1,5 +1,6 @@
-from organism import Organism
-from neat import Neat
+from neat import Neat, Organism
+
+import neat
 
 # Data for XOR (inputs, labels)
 DATA = [

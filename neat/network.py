@@ -1,11 +1,11 @@
 import random
 
-from nodes.bias_node import Bias
-from nodes.input_node import Input
-from nodes.output_node import Output
-from nodes.hidden_node import Hidden
-from connection import Connection
-from structure_tracker import register_node, register_connection, get_connection_innovation_number, get_node_innovation_number
+from neat.nodes.bias_node import Bias
+from neat.nodes.input_node import Input
+from neat.nodes.output_node import Output
+from neat.nodes.hidden_node import Hidden
+from neat.connection import Connection
+from neat.structure_tracker import register_node, register_connection, get_connection_innovation_number, get_node_innovation_number
 
 class Network:
 

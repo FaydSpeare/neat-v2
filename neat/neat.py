@@ -1,5 +1,5 @@
-from population import Population
-from organism import Organism
+from neat.population import Population
+from neat.organism import Organism
 
 class Neat:
 

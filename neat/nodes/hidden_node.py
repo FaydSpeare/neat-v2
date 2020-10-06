@@ -1,6 +1,4 @@
-import math
-
-from nodes.node import Node
+from neat.nodes.node import Node
 
 class Hidden(Node):
 

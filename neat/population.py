@@ -1,6 +1,6 @@
 import math
 
-from species import Species
+from neat.species import Species
 
 
 class Population:

@@ -3,8 +3,6 @@ import itertools
 import bisect
 import numpy as np
 
-from structure_tracker import reset_structure_tracker
-
 species_counter = itertools.count(0)
 
 class Species:

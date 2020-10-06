@@ -1,6 +1,6 @@
 import random
 
-from network import Network
+from neat.network import Network
 
 class Organism:
 

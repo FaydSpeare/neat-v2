@@ -1,4 +1,4 @@
-from nodes.node import Node
+from neat.nodes.node import Node
 
 class Bias(Node):
 
