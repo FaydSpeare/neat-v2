@@ -5,6 +5,7 @@ from nodes.input_node import Input
 from nodes.output_node import Output
 from nodes.hidden_node import Hidden
 from connection import Connection
+from structure_tracker import register_node, register_connection, get_connection_innovation_number, get_node_innovation_number
 
 class Network:
 
@@ -66,24 +67,58 @@ class Network:
         input_node = splitable_connection.get_input_node()
         output_node = splitable_connection.get_output_node()
 
+        # Remove connection so it's not split again
+        # TODO Can we split connections multiple times? -> This could break the structure_tracker as splitting the connection
+        # TODO again would give the same node innovation number. (this may only be the case if structure mutations are
+        # TODO tracked across multiple generations).
+        self.splitable_connections.remove(splitable_connection)
+
         # Disable existing connection
         splitable_connection.disable()
 
+        # Reuse node innovation number from previous identical mutation // TODO move connection create into method to reduce duplication
+        retrieved_node_number = get_node_innovation_number(splitable_connection.number)
+
         # Create new Hidden node
-        new_node = Hidden()
+        new_node = Hidden(number=retrieved_node_number)
         self.hidden_nodes.append(new_node)
 
-        first_connection = Connection(input_node, new_node)
+        # Save number for future potential duplicate structural mutations
+        if retrieved_node_number is None:
+            register_node(splitable_connection.number, new_node.number)
+
+        # Reuse connection innovation number from previous identical mutation
+        retrieved_connection_number = get_connection_innovation_number(input_node.number, new_node.number)
+
+        first_connection = Connection(input_node, new_node, number=retrieved_connection_number)
         self.connections.append(first_connection)
         self.splitable_connections.add(first_connection)
         first_connection.set_weight(1)
 
-        second_connection = Connection(new_node, output_node)
+        # Save number for future potential duplicate structural mutations
+        if retrieved_connection_number is None:
+            register_connection(input_node.number, new_node.number, first_connection.number)
+
+        # Reuse connection innovation number from previous identical mutation
+        retrieved_connection_number = get_connection_innovation_number(new_node.number, output_node.number)
+
+        second_connection = Connection(new_node, output_node, number=retrieved_connection_number)
         self.connections.append(second_connection)
         self.splitable_connections.add(second_connection)
 
-        bias_connection = Connection(self.bias, new_node)
+        # Save number for future potential duplicate structural mutations
+        if retrieved_connection_number is None:
+            register_connection(new_node.number, output_node.number, second_connection.number)
+
+        # Reuse connection innovation number from previous identical mutation
+        retrieved_connection_number = get_connection_innovation_number(self.bias.number, new_node.number)
+
+        bias_connection = Connection(self.bias, new_node, number=retrieved_connection_number)
         self.bias_connections.append(bias_connection)
+
+        # Save number for future potential duplicate structural mutations
+        if retrieved_connection_number is None:
+            register_connection(self.bias.number, new_node.number, bias_connection.number)
 
         # Add new connections to nodes
         new_node.add_connection(first_connection)
@@ -110,10 +145,19 @@ class Network:
                     # Can't connect if connection already exists
                     if not out_node.is_connected_to(in_node):
 
-                        new_connection = Connection(in_node, out_node)
+                        # Check if this structural mutation has already happened
+                        retrieved_number = get_connection_innovation_number(in_node.number, out_node.number)
+
+                        new_connection = Connection(in_node, out_node, number=retrieved_number)
                         self.connections.append(new_connection)
                         self.splitable_connections.add(new_connection)
                         out_node.add_connection(new_connection)
+
+                        # Save this structural mutation so that if it occurs again, the
+                        # innovation number for this connection can be retrieved
+                        if retrieved_number is None:
+                            register_connection(in_node.number, out_node.number, new_connection.number)
+
                         break
 
 

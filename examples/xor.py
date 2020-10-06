@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # Our subclassed organism type
     organism_type = XOR
 
-    neat = Neat(num_inputs, num_outputs, organism_type, population_size=100, assessor_function=score_assessor)
+    neat = Neat(num_inputs, num_outputs, organism_type, population_size=500, assessor_function=score_assessor)
 
     # If we don't specify a number of iteration, the search runs indefinitely
     neat.run(iterations=200)

@@ -14,7 +14,7 @@ class Neat:
     def run(self, iterations=100):
         for i in range(iterations):
             if self.population.next(self.assessor_function):
-                print("Solver Organism/s found.")
+                print("\nSolver Organism/s found.\n")
                 return
 
 

@@ -30,7 +30,7 @@ class Population:
     def calculate_fitness(self):
         [organism.calculate_fitness() for organism in self.population]
         self.population.sort(key=lambda x: x.fitness, reverse=True)
-        self.best_generation_fitness = self.population[0].fitness
+        self.best_generation_fitness = round(self.population[0].fitness, 4)
         if self.best_ever_fitness is None or self.best_generation_fitness > self.best_ever_fitness:
             self.best_ever_fitness = self.best_generation_fitness
             self.stale_count = 0
@@ -146,11 +146,13 @@ class Population:
         self.eliminate_stale_species()
         self.create_next_generation()
         self.generation += 1
+        self.print_generation_info()
 
-        print(("Gen: " + str(self.generation)).ljust(10), \
-              ("Species: " + str(len(self.species))).ljust(12), \
-              ("Pop: " + str(len(self.population))).ljust(10), \
-              self.best_generation_fitness)
+
+    def print_generation_info(self):
+        print(("Gen: " + str(self.generation)).ljust(10), end="")
+        print(("Species: " + str(len(self.species))).ljust(15), end="")
+        print("Fitness: " + str(self.best_generation_fitness))
 
 
     def assess_organisms(self, assessor_function):

@@ -3,6 +3,8 @@ import itertools
 import bisect
 import numpy as np
 
+from structure_tracker import reset_structure_tracker
+
 species_counter = itertools.count(0)
 
 class Species:
@@ -90,6 +92,11 @@ class Species:
                 if strong_parent.fitness < weak_parent.fitness:
                     strong_parent, weak_parent = weak_parent, strong_parent
                 offspring.append(strong_parent.crossover(weak_parent))
+
+        # TODO structural mutations are currently being tracked in perpetuity. is think ok?
+        # TODO it significantly reduces innovation number counts
+        # reset_structure_tracker()
+
         [o.mutate() for o in offspring]
         return offspring
 
