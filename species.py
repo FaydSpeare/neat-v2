@@ -56,10 +56,9 @@ class Species:
         innov_to_weight2 = {conn.number: conn.weight for conn in net2.connections if conn.number in matching}
         avg_weight_diff = sum(abs(innov_to_weight1[i] - innov_to_weight2[i]) for i in matching) / len(matching)
 
-        #N = 1
         N = max(len(conn_set1), len(conn_set2))
         if N < 20: N = 1.
-        return (1. * disjoint / N + 1. * excess / N + 1.0 * avg_weight_diff) < 3.0
+        return (1. * disjoint / N + 1. * excess / N + 3.0 * avg_weight_diff) < 4.0
 
 
     def eliminate_worst_organisms(self):

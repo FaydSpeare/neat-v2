@@ -187,12 +187,12 @@ class Network:
 
 
     def mutate(self):
-        if random.random() < 0.9:
+        if random.random() < 0.8:
             for c in self.connections + self.bias_connections:
                 if random.random() < 0.9: c.mutate_weight()
                 else: c.init_weight()
 
-        if random.random() < 0.05:
+        if random.random() < 0.1:
             self.add_connection()
 
         if random.random() < 0.01:

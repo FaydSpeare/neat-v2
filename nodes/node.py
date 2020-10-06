@@ -20,7 +20,7 @@ class Node:
         for connection in self.connections:
             self.sum += connection.get_output()
         self.activated = True
-        exponent = -4.9 * self.sum
+        exponent = -5 * self.sum
         exponent = max(-100., exponent)
         exponent = min(100., exponent)
         self.output = 1 / (1 + math.exp(exponent))
@@ -31,6 +31,7 @@ class Node:
         self.layer = 0
         self.activated = False
         self.output = 0.
+        self.sum = 0
 
 
     def add_connection(self, connection):

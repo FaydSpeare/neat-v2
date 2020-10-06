@@ -35,4 +35,4 @@ class Connection:
         self.weight = random.gauss(0, 1)
 
     def mutate_weight(self):
-        self.weight += 0.03 * random.gauss(0, 1)
+        self.weight += 0.01 * random.gauss(0, 1)

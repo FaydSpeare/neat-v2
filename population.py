@@ -1,9 +1,6 @@
-import time
 import math
-import numpy as np
 
 from species import Species
-from organism import Organism
 
 
 class Population:
@@ -19,7 +16,8 @@ class Population:
         self.species = list()
         self.best_generation_fitness = None
         self.best_ever_fitness = None
-        self.champion = None
+        self.best_ever_organism = None
+        self.solvers = list()
         self.stale_count = 0
         self.init_population()
 
@@ -36,7 +34,7 @@ class Population:
         if self.best_ever_fitness is None or self.best_generation_fitness > self.best_ever_fitness:
             self.best_ever_fitness = self.best_generation_fitness
             self.stale_count = 0
-            self.champion = self.population[0].replicate()
+            self.best_ever_organism = self.population[0].replicate()
         else: self.stale_count += 1
 
 
@@ -133,13 +131,13 @@ class Population:
         self.species.sort(key=lambda x: x.best_generation_fitness, reverse=True)
 
 
-    def next(self):
+    def next(self, assessor_function):
 
         self.calculate_fitness()
 
-        if (x := self.assess()) is not None:
-            return x
-
+        if assessor_function is not None:
+            if self.assess_organisms(assessor_function):
+                return True
 
         self.speciate()
         self.sort_species()
@@ -155,40 +153,12 @@ class Population:
               self.best_generation_fitness)
 
 
-    def assess(self):
+    def assess_organisms(self, assessor_function):
         for organism in self.population:
-            x = 0
-            x += organism.think([0, 0])[0] < 0.5
-            x += organism.think([0, 1])[0] > 0.5
-            x += organism.think([1, 0])[0] > 0.5
-            x += organism.think([1, 1])[0] < 0.5
-            if x == 4: return organism
-        return None
+            if assessor_function(organism):
+                self.solvers.append(organism.replicate())
+        if self.solvers: return True
 
 
-    def get_champion(self):
-        return self.champion
-
-
-if __name__ == '__main__':
-    start = time.time()
-
-
-    its = list()
-    hids = list()
-    N = 50
-    for i in range(N):
-        population = Population(2, 1, Organism, 100)
-        it = 0
-        while True:
-            it += 1
-            if (x := population.next()) is not None:
-                its.append(it)
-                hids.append(len(x.brain.hidden_nodes))
-                champ = population.get_champion()
-                break
-    print("Its", np.mean(its), np.std(its))
-    print("Hiddens", np.mean(hids), np.std(hids))
-
-    print(time.time() - start)
-    print()
+    def get_best_ever_organism(self):
+        return self.best_ever_organism

@@ -14,10 +14,13 @@ class Organism:
         self.adjusted_fitness = None
 
         if not replication:
-            self.brain = Network(num_inputs, num_inputs)
+            self.brain = Network(num_inputs, num_outputs)
+
 
     def think(self, sensors):
+        self.brain.reset()
         return self.brain.forward(sensors)
+
 
     def replicate(self):
         copy = self.__class__(self.num_inputs, self.num_outputs, replication=True)
@@ -25,16 +28,20 @@ class Organism:
         copy.fitness = self.fitness
         return copy
 
+
     def fully_weight_mutated(self):
         self.brain.full_weight_mutation()
         return self
 
+
     def mutate(self):
         self.brain.mutate()
+
 
     def reset(self):
         self.fitness = None
         self.adjusted_fitness = None
+
 
     def crossover(self, other):
         offspring = self.replicate()
@@ -64,10 +71,3 @@ class Organism:
     def __lt__(self, other):
         return self.fitness > other.fitness
 
-
-    def calculate_fitness(self):
-        x1 = 1 - self.think([0, 0])[0]
-        x2 = self.think([0, 1])[0]
-        x3 = self.think([1, 0])[0]
-        x4 = 1 - self.think([1, 1])[0]
-        self.fitness = (x1 + x2 + x3 + x4)**2
