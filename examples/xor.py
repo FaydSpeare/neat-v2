@@ -56,9 +56,13 @@ if __name__ == '__main__':
     if solvers:
 
         # Test out the solver by providing inputs to the think method
+        solver = solvers[0]
+        print("Solver Fitness:", solver.fitness)
         print("Solver outputs for XOR data:")
-        print("Fitness:", solvers[0].fitness)
-        for x, _ in DATA:
-            print(solvers[0].think(x))
+        for x, y in DATA:
+            output = solver.think(x)[0]
+            print(str(round(output, 3)).ljust(5), '->', y)
 
         # Now enjoy your trained network!
+
+
