@@ -22,19 +22,52 @@ class Organism:
     def replicate(self):
         copy = self.__class__(self.num_inputs, self.num_outputs, replication=True)
         copy.brain = self.brain.replicate()
+        copy.fitness = self.fitness
         return copy
 
     def fully_weight_mutated(self):
         self.brain.full_weight_mutation()
         return self
 
+    def mutate(self):
+        self.brain.mutate()
+
     def reset(self):
         self.fitness = None
         self.adjusted_fitness = None
 
+    def crossover(self, other):
+        offspring = self.replicate()
+
+        for conn in offspring.brain.connections:
+            for other_conn in other.brain.connections:
+                if conn.number == other_conn.number:
+                    if random.random() < 0.5: conn.weight = other_conn.weight
+
+                    if not conn.enabled or not other_conn.enabled:
+                        if random.random() < 0.75: conn.enabled = False
+                        else: conn.enabled = True
+                else:
+                    if not conn.enabled:
+                        if random.random() < 0.25: conn.enabled = True
+
+        for conn in offspring.brain.bias_connections:
+            for other_conn in other.brain.bias_connections:
+                if conn.number == other_conn.number and random.random() < 0.5:
+                    conn.weight = other_conn.weight
+
+
+
+        return offspring
+
+
     def __lt__(self, other):
-        return self.fitness < other.fitness
+        return self.fitness > other.fitness
 
 
     def calculate_fitness(self):
-        self.fitness = random.random()
+        x1 = 1 - self.think([0, 0])[0]
+        x2 = self.think([0, 1])[0]
+        x3 = self.think([1, 0])[0]
+        x4 = 1 - self.think([1, 1])[0]
+        self.fitness = (x1 + x2 + x3 + x4)**2

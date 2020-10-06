@@ -104,14 +104,17 @@ class Network:
             # Can't connect to an input node
             if out_node.get_layer() != input_layer:
 
-                # Can't connect if connection already exists
-                if not out_node.is_connected_to(in_node):
+                # Can't connect from output node
+                if in_node.get_layer() != 0:
 
-                    new_connection = Connection(in_node, out_node)
-                    self.connections.append(new_connection)
-                    self.splitable_connections.add(new_connection)
-                    out_node.add_connection(new_connection)
-                    break
+                    # Can't connect if connection already exists
+                    if not out_node.is_connected_to(in_node):
+
+                        new_connection = Connection(in_node, out_node)
+                        self.connections.append(new_connection)
+                        self.splitable_connections.add(new_connection)
+                        out_node.add_connection(new_connection)
+                        break
 
 
     def calibrate_layers(self):
@@ -183,7 +186,17 @@ class Network:
             connection.init_weight()
 
 
+    def mutate(self):
+        if random.random() < 0.9:
+            for c in self.connections + self.bias_connections:
+                if random.random() < 0.9: c.mutate_weight()
+                else: c.init_weight()
 
+        if random.random() < 0.05:
+            self.add_connection()
+
+        if random.random() < 0.01:
+            self.add_node()
 
 
 

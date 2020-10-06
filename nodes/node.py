@@ -20,8 +20,10 @@ class Node:
         for connection in self.connections:
             self.sum += connection.get_output()
         self.activated = True
-        self.output = 1 / (1 + math.exp(-min(100., 4.9 * self.sum)))
-        #print(self.number, "activated!", self.output)
+        exponent = -4.9 * self.sum
+        exponent = max(-100., exponent)
+        exponent = min(100., exponent)
+        self.output = 1 / (1 + math.exp(exponent))
         return self.output
 
 
