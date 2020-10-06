@@ -46,8 +46,8 @@ if __name__ == '__main__':
 
     neat = Neat(num_inputs, num_outputs, organism_type, population_size=500, assessor_function=score_assessor)
 
-    # If we don't specify a number of iteration, the search runs indefinitely
-    neat.run(iterations=200)
+    # If we don't specify a number of generations, the search runs indefinitely
+    neat.run(generations=200)
 
     # Retrieve the solvers
     solvers = neat.get_solvers()
@@ -57,7 +57,6 @@ if __name__ == '__main__':
         # Test out the solver by providing inputs to the think method
         print("Solver outputs for XOR data:")
         print("Fitness:", solvers[0].fitness)
-        print("Hidden Nodes:", len(solvers[0].brain.hidden_nodes))
         for x, _ in DATA:
             print(solvers[0].think(x))
 

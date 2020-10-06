@@ -11,8 +11,8 @@ class Neat:
         self.population = Population(num_inputs, num_outputs, organism_type, population_size)
 
 
-    def run(self, iterations=100):
-        for i in range(iterations):
+    def run(self, generations=100):
+        for i in range(generations):
             if self.population.next(self.assessor_function):
                 print("\nSolver Organism/s found.\n")
                 return
