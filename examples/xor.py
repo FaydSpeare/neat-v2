@@ -1,5 +1,3 @@
-from neat import Neat, Organism
-
 import neat
 
 # Data for XOR (inputs, labels)
@@ -12,7 +10,7 @@ DATA = [
 
 # We need to define an organism class that subclasses Organism
 # Take a look at the Organism class in organism.py
-class XOR(Organism):
+class XOR(neat.Organism):
 
     def calculate_fitness(self):
         error = sum([abs(y - self.think(x)[0]) for x, y in DATA])
@@ -45,22 +43,22 @@ if __name__ == '__main__':
     # Our subclassed organism type
     organism_type = XOR
 
-    neat = Neat(num_inputs, num_outputs, organism_type, population_size=500, assessor_function=score_assessor)
+    neat_solver = neat.Neat(num_inputs, num_outputs, organism_type, population_size=500, assessor_function=score_assessor)
 
     # If we don't specify a number of generations, the search runs indefinitely
-    neat.run(generations=200)
+    neat_solver.run(generations=200)
 
     # Retrieve the solvers
-    solvers = neat.get_solvers()
+    solvers = neat_solver.get_solvers()
 
     if solvers:
 
         # Test out the solver by providing inputs to the think method
-        solver = solvers[0]
-        print("Solver Fitness:", solver.fitness)
+        organism = solvers[0]
+        print("Solver Fitness:", organism.fitness)
         print("Solver outputs for XOR data:")
         for x, y in DATA:
-            output = solver.think(x)[0]
+            output = organism.think(x)[0]
             print(str(round(output, 3)).ljust(5), '->', y)
 
         # Now enjoy your trained network!

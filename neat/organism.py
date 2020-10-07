@@ -43,27 +43,28 @@ class Organism:
         self.adjusted_fitness = None
 
 
-    def crossover(self, other):
+    def crossover(self, other_parent):
+
+        # Create copy of this organism (parent with higher fitness)
         offspring = self.replicate()
 
-        for conn in offspring.brain.connections:
-            for other_conn in other.brain.connections:
+        for conn in offspring.brain.get_connections():
+            for other_conn in other_parent.brain.get_connections():
+
+                # If connection has matching innovation number
                 if conn.number == other_conn.number:
-                    if random.random() < 0.5: conn.weight = other_conn.weight
 
+                    # Randomly decide which parent's weight to use
+                    if random.random() < 0.5:
+                        conn.weight = other_conn.weight
+
+                    # disable connection with prob 0.75 if either parent connection is disabled
                     if not conn.enabled or not other_conn.enabled:
-                        if random.random() < 0.75: conn.enabled = False
-                        else: conn.enabled = True
-                else:
-                    if not conn.enabled:
-                        if random.random() < 0.25: conn.enabled = True
+                        conn.enabled = not (random.random() < 0.75)
 
-        for conn in offspring.brain.bias_connections:
-            for other_conn in other.brain.bias_connections:
-                if conn.number == other_conn.number and random.random() < 0.5:
-                    conn.weight = other_conn.weight
-
-
+                # disable connection with prob 0.75 parent connection is disabled
+                elif not conn.enabled:
+                        conn.enabled = not (random.random() < 0.75)
 
         return offspring
 

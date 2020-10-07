@@ -32,7 +32,8 @@ class Species:
 
 
     def share_fitness(self):
-        for organism in self.organisms: organism.adjusted_fitness = organism.fitness / len(self.organisms)
+        for organism in self.organisms:
+            organism.adjusted_fitness = organism.fitness / len(self.organisms)
 
 
     def get_total_shared_fitness(self):
@@ -58,7 +59,9 @@ class Species:
 
         N = max(len(conn_set1), len(conn_set2))
         if N < 20: N = 1.
-        return (1. * disjoint / N + 1. * excess / N + 3.0 * avg_weight_diff) < 4.0
+        c1, c2, c3 = 1., 1., 3.
+        threshold = 4.
+        return (c1 * disjoint / N + c2 * excess / N + c3 * avg_weight_diff) < threshold
 
 
     def eliminate_worst_organisms(self):
@@ -68,10 +71,16 @@ class Species:
 
 
     def parent_selector(self):
+
         fitness_list = np.array([organism.fitness for organism in self.organisms])
-        probs = fitness_list / sum(fitness_list)
+        portions = fitness_list / sum(fitness_list)
+        cum_sum = np.cumsum(portions)
+
         while True:
-            yield self.organisms[bisect.bisect(np.cumsum(probs), random.random())]
+
+            # Returns parents with probability proportional to their fitness
+            parent_idx = bisect.bisect(cum_sum, random.random())
+            yield self.organisms[parent_idx]
 
 
     def get_champion(self):
@@ -79,11 +88,17 @@ class Species:
 
 
     def create_offspring(self, amount):
+
         offspring = list()
         parent = self.parent_selector()
+
         for _ in range(amount):
+
+            # Simply copy parent 25% of the time
             if random.random() < 0.25:
                 offspring.append(next(parent).replicate())
+
+            # Crossover parents
             else:
                 strong_parent = next(parent)
                 weak_parent = next(parent)
@@ -91,10 +106,11 @@ class Species:
                     strong_parent, weak_parent = weak_parent, strong_parent
                 offspring.append(strong_parent.crossover(weak_parent))
 
-        # TODO structural mutations are currently being tracked in perpetuity. is think ok?
-        # TODO it significantly reduces innovation number counts
-        # reset_structure_tracker()
+        # Mutate each of the offspring
+        [child.mutate() for child in offspring]
 
-        [o.mutate() for o in offspring]
         return offspring
 
+    # TODO structural mutations are currently being tracked in perpetuity. is think ok?
+    # TODO it significantly reduces innovation number counts
+    # reset_structure_tracker()

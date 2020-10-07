@@ -72,37 +72,42 @@ class Population:
 
     def create_next_generation(self):
 
+        # Remove all species aside from the top 2 if the whole population
+        # has been stale for more than 20 generations
         if self.stale_count > 20:
             self.species = self.species[:2]
 
         total_population_fitness = sum([species.get_total_shared_fitness() for species in self.species])
-        total_offspring = 0
         offspring = list()
-
         living_species = set()
 
         for species in self.species:
+
+            # Assign number of offspring based on total fitness proportion
             total_species_fitness = species.get_total_shared_fitness()
             proportion = total_species_fitness / total_population_fitness
             num_offspring = math.floor(proportion * self.population_size)
-            total_offspring += num_offspring
+
+            # Add champion if 5 or more offspring
             if num_offspring >= 5:
                 offspring.append(species.get_champion().replicate())
                 num_offspring -= 1
+
+            # Add the remaining offspring
             offspring.extend(species.create_offspring(num_offspring))
             if num_offspring > 0: living_species.add(species)
 
+        # TODO this is positively gross looking
 
-        if total_offspring < self.population_size:
+        if len(offspring) < self.population_size:
             for species in self.species:
                 total_species_fitness = species.get_total_shared_fitness()
                 proportion = total_species_fitness / total_population_fitness
                 num_offspring = math.ceil(proportion * self.population_size)
-                num_offspring = min(self.population_size - total_offspring, num_offspring)
+                num_offspring = min(self.population_size - len(offspring), num_offspring)
                 offspring.extend(species.create_offspring(num_offspring))
                 if num_offspring > 0: living_species.add(species)
-                total_offspring += num_offspring
-                if total_offspring == self.population_size: break
+                if len(offspring) == self.population_size: break
 
         self.species = list(living_species)
         self.population = offspring
@@ -112,8 +117,12 @@ class Population:
 
         non_stale_species = list()
         for species in self.species:
+
+            # If a species has been stale for 15 generations eliminate it, unless
+            # it is one of the top 2 species.
             if species.stale_count < 15 or self.species.index(species) < 2:
                 non_stale_species.append(species)
+
         self.species = non_stale_species
 
         if len(self.species) == 0: print("All species died.")
@@ -135,6 +144,7 @@ class Population:
 
         self.calculate_fitness()
 
+        # Used to determine if any organisms can solve the task yet
         if assessor_function is not None:
             if self.assess_organisms(assessor_function):
                 return True
