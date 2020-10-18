@@ -4,17 +4,18 @@ from neat.network import Network
 
 class Organism:
 
-    def __init__(self, num_inputs, num_outputs, replication=False):
+    def __init__(self, config, replication=False):
 
         self.brain = None
-        self.num_inputs = num_inputs
-        self.num_outputs = num_outputs
+        self.config = config
+        self.num_inputs = config['num_inputs']
+        self.num_outputs = config['num_outputs']
 
         self.fitness = None
         self.adjusted_fitness = None
 
         if not replication:
-            self.brain = Network(num_inputs, num_outputs)
+            self.brain = Network(self.config)
 
 
     def think(self, sensors):
@@ -23,7 +24,7 @@ class Organism:
 
 
     def replicate(self):
-        copy = self.__class__(self.num_inputs, self.num_outputs, replication=True)
+        copy = self.__class__(self.config, replication=True)
         copy.brain = self.brain.replicate()
         copy.fitness = self.fitness
         return copy

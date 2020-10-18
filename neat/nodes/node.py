@@ -1,11 +1,11 @@
 import itertools
-import math
 
 node_innovation_counter = itertools.count(1)
 
 class Node:
 
-    def __init__(self, number):
+    def __init__(self, activation_func, number):
+        self.activation_func = activation_func
         self.layer = 0
         self.number = next(node_innovation_counter) if number is None else number
         self.sum = 0.
@@ -13,19 +13,17 @@ class Node:
         self.connections = list()
         self.activated = False
 
-
     def get_output(self):
         if self.activated:
             return self.output
         for connection in self.connections:
             self.sum += connection.get_output()
-        self.activated = True
-        exponent = -5 * self.sum
-        exponent = max(-100., exponent)
-        exponent = min(100., exponent)
-        self.output = 1 / (1 + math.exp(exponent))
+        self.activate()
         return self.output
 
+    def activate(self):
+        self.activated = True
+        self.output = self.activation_func(self.sum)
 
     def reset(self):
         self.layer = 0
@@ -54,6 +52,7 @@ class Node:
 
     def is_connected_to(self, node):
         return node in [connection.input_node for connection in self.connections]
+
 
 
 

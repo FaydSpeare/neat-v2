@@ -5,9 +5,10 @@ connection_innovation_counter = itertools.count()
 
 class Connection:
 
-    def __init__(self, input_node, output_node, number=None):
+    def __init__(self, input_node, output_node, config, number=None):
         self.input_node = input_node
         self.output_node = output_node
+        self.config = config
         self.number = next(connection_innovation_counter) if number is None else number
         self.weight = None
         self.enabled = True
@@ -31,8 +32,14 @@ class Connection:
     def backward(self, layer):
         self.input_node.backward(layer - 1)
 
+    def get_perturbation(self):
+        if self.config['weight_init'] == 'gauss':
+            return random.gauss(*self.config['weight_init_params'])
+        if self.config['weight_init'] == 'uniform':
+            return random.uniform(*self.config['weight_init_params'])
+
     def init_weight(self):
-        self.weight = random.gauss(0, 1)
+        self.weight = self.get_perturbation()
 
     def mutate_weight(self):
-        self.weight += 0.01 * random.gauss(0, 1)
+        self.weight += self.config['weight_mutate_step'] * self.get_perturbation()

@@ -2,11 +2,11 @@ from neat.nodes.node import Node
 
 class Bias(Node):
 
-    def __init__(self, number=0):
-        super().__init__(number)
+    def __init__(self):
+        super().__init__(None, 0)
 
     def replicate(self):
-        return Bias(self.number)
+        return Bias()
 
     def get_output(self):
         return 1.

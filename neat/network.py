@@ -6,13 +6,15 @@ from neat.nodes.output_node import Output
 from neat.nodes.hidden_node import Hidden
 from neat.connection import Connection
 from neat.structure_tracker import register_node, register_connection, get_connection_innovation_number, get_node_innovation_number
+from neat.nodes import activations
 
 class Network:
 
-    def __init__(self, num_inputs, num_outputs, replication=False):
+    def __init__(self, config, replication=False):
 
-        self.num_inputs = num_inputs
-        self.num_outputs = num_outputs
+        self.config = config
+        self.num_inputs = config['num_inputs']
+        self.num_outputs = config['num_outputs']
 
         self.bias = Bias()
         self.input_nodes = list()
@@ -28,13 +30,14 @@ class Network:
 
     def create_initial_connections(self):
         self.input_nodes = [Input() for _ in range(self.num_inputs)]
-        self.output_nodes = [Output() for _ in range(self.num_outputs)]
+        output_activation = self.get_activation(self.config['output_activation'])
+        self.output_nodes = [Output(output_activation) for _ in range(self.num_outputs)]
         for out_node in self.output_nodes:
-            bias_connection = Connection(self.bias, out_node)
+            bias_connection = Connection(self.bias, out_node, self.config)
             self.bias_connections.append(bias_connection)
             out_node.add_connection(bias_connection)
             for in_node in self.input_nodes:
-                connection = Connection(in_node, out_node)
+                connection = Connection(in_node, out_node, self.config)
                 self.connections.append(connection)
                 out_node.add_connection(connection)
                 self.splitable_connections.add(connection)
@@ -58,6 +61,24 @@ class Network:
         return [node.get_output() for node in self.output_nodes]
 
 
+    def get_activation(self, func):
+        if func == 'sigmoid':
+            return activations.sigmoid
+        elif func == 'relu':
+            return activations.relu
+        elif func == 'gauss':
+            return activations.gauss
+        elif func == 'identity':
+            return activations.identity
+        elif func == 'sin':
+            return activations.sin
+
+
+    def get_random_activation(self):
+        chosen_activation = random.choices(self.config['activations'], weights=self.config['activation_weights'])[0]
+        return self.get_activation(chosen_activation)
+
+
     def create_node(self, connection):
 
         # Remove connection so it's not split again
@@ -73,7 +94,8 @@ class Network:
         number = get_node_innovation_number(connection.number)
 
         # Create new Hidden node
-        new_node = Hidden(number=number)
+        activation_func = self.get_random_activation()
+        new_node = Hidden(activation_func, number=number)
         self.hidden_nodes.append(new_node)
 
         # Save number for future potential duplicate structural mutations
@@ -87,7 +109,7 @@ class Network:
         # Reuse node innovation number from previous identical mutation if possible
         number = get_connection_innovation_number(inode.number, onode.number)
 
-        connection = Connection(inode, onode, number=number)
+        connection = Connection(inode, onode, self.config, number=number)
         self.connections.append(connection)
 
         # Connect to out node
@@ -167,7 +189,7 @@ class Network:
 
     def replicate(self):
 
-        copy = Network(self.num_inputs, self.num_outputs, replication=True)
+        copy = Network(self.config, replication=True)
 
         innovation_number_to_node = {0 : copy.bias}
 
@@ -198,7 +220,7 @@ class Network:
                 input_node_copy = innovation_number_to_node[connection.input_node.number]
                 output_node_copy = innovation_number_to_node[connection.output_node.number]
 
-                connection_copy = Connection(input_node_copy, output_node_copy, number=connection.number)
+                connection_copy = Connection(input_node_copy, output_node_copy, self.config, number=connection.number)
                 connection_copy.enabled = connection.enabled
                 connection_copy.weight = connection.weight
 
@@ -222,17 +244,17 @@ class Network:
 
     def mutate(self):
 
-        if random.random() < 0.8:
+        if random.random() < self.config['mutate_weight_prob']:
             for c in self.connections + self.bias_connections:
-                if random.random() < 0.9:
+                if random.random() > self.config['replace_weight_prob']:
                     c.mutate_weight()
                 else:
                     c.init_weight()
 
-        if random.random() < 0.1:
+        if random.random() < self.config['add_conn_prob']:
             self.add_connection()
 
-        if random.random() < 0.01:
+        if random.random() < self.config['add_node_prob']:
             self.add_node()
 
 
@@ -242,7 +264,7 @@ class Network:
 
 
 if __name__ == '__main__':
-    net = Network(3, 80)
+    net = Network({'num_inputs' : 3, 'num_outputs' : 8})
 
     for i in range(20):
         net.add_node()

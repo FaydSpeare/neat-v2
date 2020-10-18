@@ -5,12 +5,13 @@ from neat.species import Species
 
 class Population:
 
-    def __init__(self, num_inputs, num_outputs, organism, population_size):
+    def __init__(self, organism, config):
 
         self.organism_type = organism
-        self.num_inputs = num_inputs
-        self.num_outputs = num_outputs
-        self.population_size = population_size
+        self.config = config
+        self.num_inputs = config['num_inputs']
+        self.num_outputs = config['num_outputs']
+        self.population_size = config['population_size']
         self.generation = 0
         self.population = None
         self.species = list()
@@ -23,7 +24,7 @@ class Population:
 
 
     def init_population(self):
-        model = self.organism_type(self.num_inputs, self.num_outputs)
+        model = self.organism_type(self.config)
         self.population = [model.replicate().fully_weight_mutated() for _ in range(self.population_size)]
 
 

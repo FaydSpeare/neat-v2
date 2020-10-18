@@ -36,14 +36,17 @@ def fitness_assessor(organism):
 
 if __name__ == '__main__':
 
-    # Number of inputs and outputs for the network
-    num_inputs = 2
-    num_outputs = 1
+    # Configure NEAT parameters
+    custom_config = {
+        'population_size' : 500,
+        'num_inputs' : 2,
+        'num_outputs' : 1
+    }
 
     # Our subclassed organism type
     organism_type = XOR
 
-    neat_solver = neat.Neat(num_inputs, num_outputs, organism_type, population_size=500, assessor_function=score_assessor)
+    neat_solver = neat.Neat(organism_type, custom_config, assessor_function=score_assessor)
 
     # If we don't specify a number of generations, the search runs indefinitely
     neat_solver.run(generations=200)
@@ -59,7 +62,7 @@ if __name__ == '__main__':
         print("Solver outputs for XOR data:")
         for x, y in DATA:
             output = organism.think(x)[0]
-            print(str(round(output, 3)).ljust(5), '->', y)
+            print(x, '->', round(output, 3))
 
         # Now enjoy your trained network!
 

@@ -3,7 +3,7 @@ from neat.nodes.node import Node
 class Input(Node):
 
     def __init__(self, number=None):
-        super().__init__(number)
+        super().__init__(None, number)
 
     def replicate(self):
         return Input(self.number)
