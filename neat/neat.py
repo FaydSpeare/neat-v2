@@ -49,9 +49,21 @@ class Neat:
             'weight_init_params' : [0, 1],
             'weight_mutate_step' :   0.01,
 
-            'activations' : ['relu'],
-            'activation_weights' : [1.],
-            'output_activation' : 'sigmoid'
+            'activations' : ['sigmoid'],
+            'activation_weights' : [1],
+            'output_activation' : 'sigmoid',
+
+            'weight_min' : -3,
+            'weight_max' : 3,
+
+            'compat_disjoint_coeff' : 1.0,
+            'compat_weight_coeff' : 3.0,
+            'compat_threshold' : 4.0,
+
+            'survival_threshold': 0.2,
+            'champion' : True,
+            'min_species_size' : 2,
+            'elitists' : 2
 
         }
 

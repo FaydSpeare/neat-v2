@@ -63,7 +63,7 @@ class Population:
                     break
 
             # Create new species
-            else: self.species.append(Species(organism))
+            else: self.species.append(Species(self.config, organism))
 
         # Remove any species without organisms
         self.species = [species for species in self.species if species.organisms]
@@ -84,7 +84,8 @@ class Population:
         offspring = list()
         living_species = set()
 
-        offspring.append(self.best_generation_organism.replicate())
+        if self.config['champion']:
+            offspring.append(self.best_generation_organism.replicate())
 
         for species in self.species:
 
@@ -94,9 +95,14 @@ class Population:
             num_offspring = math.floor(proportion * self.population_size)
 
             # Add champion if 5 or more offspring
-            if num_offspring >= 5:
-                offspring.append(species.get_champion().replicate())
-                num_offspring -= 1
+            # TODO above or below?
+            # Add elitists
+
+            elitists = min(num_offspring, self.config['elitists'])
+            elitists = min(elitists, len(species.organisms))
+            for i in range(elitists):
+                offspring.append(species.organisms[i])
+            num_offspring -= elitists
 
             # Add the remaining offspring
             offspring.extend(species.create_offspring(num_offspring))
