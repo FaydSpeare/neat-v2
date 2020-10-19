@@ -18,6 +18,7 @@ class Population:
         self.best_generation_fitness = None
         self.best_ever_fitness = None
         self.best_ever_organism = None
+        self.best_generation_organism = None
         self.solvers = list()
         self.stale_count = 0
         self.init_population()
@@ -32,6 +33,7 @@ class Population:
         [organism.calculate_fitness() for organism in self.population]
         self.population.sort(key=lambda x: x.fitness, reverse=True)
         self.best_generation_fitness = round(self.population[0].fitness, 4)
+        self.best_generation_organism = self.population[0]
         if self.best_ever_fitness is None or self.best_generation_fitness > self.best_ever_fitness:
             self.best_ever_fitness = self.best_generation_fitness
             self.stale_count = 0
@@ -81,6 +83,8 @@ class Population:
         total_population_fitness = sum([species.get_total_shared_fitness() for species in self.species])
         offspring = list()
         living_species = set()
+
+        offspring.append(self.best_generation_organism.replicate())
 
         for species in self.species:
 

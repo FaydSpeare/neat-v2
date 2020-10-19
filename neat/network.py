@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 from neat.nodes.bias_node import Bias
 from neat.nodes.input_node import Input
@@ -51,11 +52,16 @@ class Network:
 
     def forward(self, inputs):
 
+        t_inputs = np.array(inputs).transpose()
+
         # Reset all nodes
         self.reset()
 
+        # Set bias
+        self.bias.set_input(np.ones_like(t_inputs[0]))
+
         # Set Inputs
-        [node.set_input(inputs[i]) for i, node in enumerate(self.input_nodes)]
+        [node.set_input(t_inputs[i]) for i, node in enumerate(self.input_nodes)]
 
         # Get Outputs
         return [node.get_output() for node in self.output_nodes]
