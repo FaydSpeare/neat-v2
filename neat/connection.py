@@ -43,3 +43,4 @@ class Connection:
 
     def mutate_weight(self):
         self.weight += self.config['weight_mutate_step'] * self.get_perturbation()
+        self.weight = min(max(self.config['weight_min'], self.weight), self.config['weight_max'])

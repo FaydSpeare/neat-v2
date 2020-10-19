@@ -8,5 +8,11 @@ class Bias(Node):
     def replicate(self):
         return Bias()
 
+    def set_input(self, output):
+        self.activated = True
+        self.output = output
+
     def get_output(self):
-        return 1.
+        if not self.activated:
+            raise Exception("Input Node has not been activated")
+        return self.output

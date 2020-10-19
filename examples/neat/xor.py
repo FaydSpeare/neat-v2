@@ -1,20 +1,30 @@
 import neat
+import numpy as np
 
 # Data for XOR (inputs, labels)
-DATA = [
-    ([0, 0], 0),
-    ([0, 1], 1),
-    ([1, 0], 1),
-    ([1, 1], 0)
-]
+
+X = np.array([
+    [0., 0.],
+    [0., 1.],
+    [1., 0.],
+    [1., 1.]
+])
+
+Y = np.array([
+    0.,
+    1.,
+    1.,
+    0.
+])
 
 # We need to define an organism class that subclasses Organism
 # Take a look at the Organism class in organism.py
 class XOR(neat.Organism):
 
     def calculate_fitness(self):
-        error = sum([abs(y - self.think(x)[0]) for x, y in DATA])
-        correct = len(DATA) - error
+        a = self.think(X)
+        error = np.sum(abs(a - Y))
+        correct = len(X) - error
         self.fitness = correct ** 2
 
 
@@ -24,8 +34,9 @@ class XOR(neat.Organism):
 # search will terminate. A list of organism which 'solve' our assessor function
 # can be retrieve from the NEAT object via the get_solvers() method.
 def score_assessor(organism):
-    score = sum([abs(y - organism.think(x)[0]) < 0.5 for x, y in DATA])
-    return score == len(DATA)
+    a = organism.think(X)
+    score = np.sum(abs(Y - a) < 0.5)
+    return score == len(X)
 
 
 # Note that we have access to information inside the organism objects, we could,
@@ -60,10 +71,12 @@ if __name__ == '__main__':
         organism = solvers[0]
         print("Solver Fitness:", organism.fitness)
         print("Solver outputs for XOR data:")
-        for x, y in DATA:
-            output = organism.think(x)[0]
-            print(x, '->', round(output, 3))
+        outputs = organism.think(X)[0]
+        for idx, output in enumerate(outputs):
+            print(X[idx], '->', round(output, 3))
 
         # Now enjoy your trained network!
+
+
 
 

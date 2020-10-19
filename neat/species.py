@@ -7,8 +7,9 @@ species_counter = itertools.count(0)
 
 class Species:
 
-    def __init__(self, organism):
+    def __init__(self, config, organism):
 
+        self.config = config
         self.number = next(species_counter)
         self.genome = organism.brain.replicate()
         self.organisms = [organism]
@@ -59,16 +60,14 @@ class Species:
 
         N = max(len(conn_set1), len(conn_set2))
         if N < 20: N = 1.
-        c1, c2, c3 = 1., 1., 3.
-        threshold = 4.
+        c1, c2, c3 = self.config['compat_disjoint_coeff'], self.config['compat_disjoint_coeff'], self.config['compat_weight_coeff']
+        threshold = self.config['compat_threshold']
         return (c1 * disjoint / N + c2 * excess / N + c3 * avg_weight_diff) < threshold
 
 
     def eliminate_worst_organisms(self):
-        if len(self.organisms) > 2:
-            remove_amount = len(self.organisms) // 2
-            self.organisms = self.organisms[:-remove_amount]
-
+        survivors = max(int(self.config['survival_threshold'] * len(self.organisms)), self.config['min_species_size'])
+        self.organisms = self.organisms[:survivors]
 
     def parent_selector(self):
 

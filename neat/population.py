@@ -18,6 +18,7 @@ class Population:
         self.best_generation_fitness = None
         self.best_ever_fitness = None
         self.best_ever_organism = None
+        self.best_generation_organism = None
         self.solvers = list()
         self.stale_count = 0
         self.init_population()
@@ -32,6 +33,7 @@ class Population:
         [organism.calculate_fitness() for organism in self.population]
         self.population.sort(key=lambda x: x.fitness, reverse=True)
         self.best_generation_fitness = round(self.population[0].fitness, 4)
+        self.best_generation_organism = self.population[0]
         if self.best_ever_fitness is None or self.best_generation_fitness > self.best_ever_fitness:
             self.best_ever_fitness = self.best_generation_fitness
             self.stale_count = 0
@@ -61,7 +63,7 @@ class Population:
                     break
 
             # Create new species
-            else: self.species.append(Species(organism))
+            else: self.species.append(Species(self.config, organism))
 
         # Remove any species without organisms
         self.species = [species for species in self.species if species.organisms]
@@ -82,6 +84,9 @@ class Population:
         offspring = list()
         living_species = set()
 
+        if self.config['champion']:
+            offspring.append(self.best_generation_organism.replicate())
+
         for species in self.species:
 
             # Assign number of offspring based on total fitness proportion
@@ -90,9 +95,14 @@ class Population:
             num_offspring = math.floor(proportion * self.population_size)
 
             # Add champion if 5 or more offspring
-            if num_offspring >= 5:
-                offspring.append(species.get_champion().replicate())
-                num_offspring -= 1
+            # TODO above or below?
+            # Add elitists
+
+            elitists = min(num_offspring, self.config['elitists'])
+            elitists = min(elitists, len(species.organisms))
+            for i in range(elitists):
+                offspring.append(species.organisms[i])
+            num_offspring -= elitists
 
             # Add the remaining offspring
             offspring.extend(species.create_offspring(num_offspring))
