@@ -16,3 +16,6 @@ def identity(x):
 
 def relu(x):
     return np.maximum(x, 0.)
+
+def abs(x):
+    return np.abs(x)

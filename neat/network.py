@@ -78,6 +78,8 @@ class Network:
             return activations.identity
         elif func == 'sin':
             return activations.sin
+        elif func == 'abs':
+            return activations.abs
 
 
     def get_random_activation(self):

@@ -84,7 +84,7 @@ def get_error(model, data):
         max_idx = np.argmax(pred)
         x_pred, y_pred = max_idx // size, max_idx % size
         x_label, y_label = labels[i]
-        dx, dy = (2 / size) * (x_pred - x_label), (2 / size) * (y_pred - y_label)
+        dx, dy = (2 / (size - 1)) * (x_pred - x_label), (2 / (size - 1)) * (y_pred - y_label)
 
         pred_error = dx ** 2 + dy ** 2
         error += pred_error

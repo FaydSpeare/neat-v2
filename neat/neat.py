@@ -66,7 +66,7 @@ class Neat:
             'elitists' : 2,
 
             'custom_print_fields' : [],
-            'stats_file' : 'stats.neat'
+            'stats_file' : None
 
         }
 

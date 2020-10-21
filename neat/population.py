@@ -186,7 +186,7 @@ class Population:
         # Used to determine if any organisms can solve the task yet
         if assessor_function is not None:
             if self.assess_organisms(assessor_function):
-                self.print_file()
+                if self.config['stats_file'] is not None: self.print_file()
                 return True
 
         self.speciate()
