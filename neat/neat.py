@@ -63,7 +63,10 @@ class Neat:
             'survival_threshold': 0.2,
             'champion' : True,
             'min_species_size' : 2,
-            'elitists' : 2
+            'elitists' : 2,
+
+            'custom_print_fields' : [],
+            'stats_file' : 'stats.neat'
 
         }
 

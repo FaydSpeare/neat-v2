@@ -7,5 +7,6 @@ def from_hyper_net(net, cppn_inputs, model):
     weight_matrix = 3 * (x > 0.2) * x
     dense = model.layers[1]
     dense.kernel = tf.constant(weight_matrix.astype('float32'))
+    return dense.kernel
 
 

@@ -15,13 +15,17 @@ def get_connection_innovation_number(in_node, out_node):
 
 node_innovations = dict()
 
-def register_node(connection, node_innovation):
+def register_node(connection, node_innovation, afunc_string):
+    """
+    nodes are given different innovations if their activation function are different
+    although they are splitting the same connection.
+    """
     global node_innovations
-    node_innovations[connection] = node_innovation
+    node_innovations[(connection, afunc_string)] = node_innovation
 
-def get_node_innovation_number(connection):
+def get_node_innovation_number(connection, afunc_string):
     global node_innovations
-    if VERBOSE and connection in node_innovations:
+    if VERBOSE and (connection, afunc_string) in node_innovations:
         print("saved NODE number", node_innovations[connection])
     return node_innovations.get(connection)
 
