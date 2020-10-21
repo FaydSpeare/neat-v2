@@ -82,7 +82,7 @@ class Network:
 
     def get_random_activation(self):
         chosen_activation = random.choices(self.config['activations'], weights=self.config['activation_weights'])[0]
-        return self.get_activation(chosen_activation)
+        return chosen_activation, self.get_activation(chosen_activation)
 
 
     def create_node(self, connection):
@@ -96,16 +96,18 @@ class Network:
         # Disable existing connection
         connection.disable()
 
+        # Get random activation
+        func_string, activation_func = self.get_random_activation()
+
         # Reuse node innovation number from previous identical mutation
-        number = get_node_innovation_number(connection.number)
+        number = get_node_innovation_number(connection.number, func_string)
 
         # Create new Hidden node
-        activation_func = self.get_random_activation()
         new_node = Hidden(activation_func, number=number)
         self.hidden_nodes.append(new_node)
 
         # Save number for future potential duplicate structural mutations
-        if number is None: register_node(connection.number, new_node.number)
+        if number is None: register_node(connection.number, new_node.number, func_string)
 
         return new_node
 

@@ -23,6 +23,15 @@ class Population:
         self.stale_count = 0
         self.init_population()
 
+        self.file_stats = {
+            'generation' : [],
+            'fitness' : [],
+            'species' : []
+        }
+
+        for attr in self.config['custom_print_fields']:
+            self.file_stats[attr] = list()
+
 
     def init_population(self):
         model = self.organism_type(self.config)
@@ -72,26 +81,44 @@ class Population:
     def cull_species(self):
         [species.eliminate_worst_organisms() for species in self.species]
 
+        # Remove eliminated organisms from population
+        new_population = list()
+        [new_population.extend(species.organisms) for species in self.species]
+        self.population = new_population
+
+
 
     def create_next_generation(self):
+
+        offspring = list()
+        living_species = set()
 
         # Remove all species aside from the top 2 if the whole population
         # has been stale for more than 20 generations
         if self.stale_count > 20:
             self.species = self.species[:2]
 
-        total_population_fitness = sum([species.get_total_shared_fitness() for species in self.species])
-        offspring = list()
-        living_species = set()
-
         if self.config['champion']:
             offspring.append(self.best_generation_organism.replicate())
 
+        fitness_list = [organism.adjusted_fitness for organism in self.population]
+        min_fitness = min(fitness_list)
+        max_fitness = max(fitness_list)
+        fitness_range = max(1., max_fitness - min_fitness)
+
+        adjusted_fitness_list = [(s.get_mean_shared_fitness() - min_fitness) / fitness_range for s in self.species]
+        total_adjusted_fitness = sum(adjusted_fitness_list)
+
+        #num_offspring_list = [math.floor(self.population_size * (((species.get_mean_shared_fitness() - min_fitness) / fitness_range) / total_adjusted_fitness)) for species in self.species]
+        #print(adjusted_fitness_list)
+        #print(num_offspring_list)
+
         for species in self.species:
 
+
             # Assign number of offspring based on total fitness proportion
-            total_species_fitness = species.get_total_shared_fitness()
-            proportion = total_species_fitness / total_population_fitness
+            adjusted_fitness = (species.get_mean_shared_fitness() - min_fitness) / fitness_range
+            proportion = adjusted_fitness / total_adjusted_fitness
             num_offspring = math.floor(proportion * self.population_size)
 
             # Add champion if 5 or more offspring
@@ -112,13 +139,14 @@ class Population:
 
         if len(offspring) < self.population_size:
             for species in self.species:
-                total_species_fitness = species.get_total_shared_fitness()
-                proportion = total_species_fitness / total_population_fitness
+                adjusted_fitness = (species.get_mean_shared_fitness() - min_fitness) / fitness_range
+                proportion = adjusted_fitness / total_adjusted_fitness
                 num_offspring = math.ceil(proportion * self.population_size)
                 num_offspring = min(self.population_size - len(offspring), num_offspring)
                 offspring.extend(species.create_offspring(num_offspring))
                 if num_offspring > 0: living_species.add(species)
                 if len(offspring) == self.population_size: break
+
 
         self.species = list(living_species)
         self.population = offspring
@@ -158,6 +186,7 @@ class Population:
         # Used to determine if any organisms can solve the task yet
         if assessor_function is not None:
             if self.assess_organisms(assessor_function):
+                self.print_file()
                 return True
 
         self.speciate()
@@ -173,7 +202,36 @@ class Population:
     def print_generation_info(self):
         print(("Gen: " + str(self.generation)).ljust(10), end="")
         print(("Species: " + str(len(self.species))).ljust(15), end="")
-        print("Fitness: " + str(self.best_generation_fitness))
+        print(("Fitness: " + str(self.best_generation_fitness)).ljust(25), end="")
+        print(("Size: " + str(len(self.population))).ljust(15), end="")
+
+        if len(self.config['custom_print_fields']) > 0:
+            custom_attrs = dict()
+            for attr in self.config['custom_print_fields']:
+                custom_attrs[attr] = getattr(self.best_generation_organism, attr)
+            print("Custom_Attrs:", custom_attrs, end="")
+
+        print()
+        self.append_file_info()
+
+    def append_file_info(self):
+
+        self.file_stats['generation'].append(self.generation)
+        self.file_stats['fitness'].append(self.best_generation_fitness)
+        self.file_stats['species'].append(len(self.species))
+
+        for attr in self.config['custom_print_fields']:
+            self.file_stats[attr].append(getattr(self.best_generation_organism, attr))
+
+    def print_file(self):
+
+        f = open(self.config['stats_file'], "w")
+        for key in self.file_stats:
+            f.write(key)
+            f.write(str(self.file_stats[key]))
+            f.write('\n')
+        f.close()
+
 
 
     def assess_organisms(self, assessor_function):

@@ -37,8 +37,8 @@ class Species:
             organism.adjusted_fitness = organism.fitness / len(self.organisms)
 
 
-    def get_total_shared_fitness(self):
-        return sum([organism.adjusted_fitness for organism in self.organisms])
+    def get_mean_shared_fitness(self):
+        return sum([organism.adjusted_fitness for organism in self.organisms]) / len(self.organisms)
 
 
     def is_compatible_with(self, organism):
