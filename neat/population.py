@@ -95,7 +95,7 @@ class Population:
 
         # Remove all species aside from the top 2 if the whole population
         # has been stale for more than 20 generations
-        if self.stale_count > 20:
+        if self.stale_count > self.config['population_stag']:
             self.species = self.species[:2]
 
         if self.config['champion']:
@@ -118,7 +118,7 @@ class Population:
 
             # Assign number of offspring based on total fitness proportion
             adjusted_fitness = (species.get_mean_shared_fitness() - min_fitness) / fitness_range
-            proportion = adjusted_fitness / total_adjusted_fitness
+            proportion = 1. if total_adjusted_fitness == 0 else adjusted_fitness / total_adjusted_fitness
             num_offspring = math.floor(proportion * self.population_size)
 
             # Add champion if 5 or more offspring
@@ -159,7 +159,7 @@ class Population:
 
             # If a species has been stale for 15 generations eliminate it, unless
             # it is one of the top 2 species.
-            if species.stale_count < 15 or self.species.index(species) < 2:
+            if species.stale_count < self.config['species_stag'] or self.species.index(species) < 2:
                 non_stale_species.append(species)
 
         self.species = non_stale_species
@@ -237,7 +237,7 @@ class Population:
     def assess_organisms(self, assessor_function):
         for organism in self.population:
             if assessor_function(organism):
-                self.solvers.append(organism.replicate())
+                self.solvers.append(organism)
         if self.solvers: return True
 
 

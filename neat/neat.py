@@ -66,7 +66,12 @@ class Neat:
             'elitists' : 2,
 
             'custom_print_fields' : [],
-            'stats_file' : None
+            'stats_file' : None,
+
+            'dup_parent' : 0.25,
+
+            'population_stag' : 20,
+            'species_stag' : 15
 
         }
 

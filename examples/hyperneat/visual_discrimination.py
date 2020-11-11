@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
         'compat_disjoint_coeff': 2.0,
         'compat_weight_coeff': 2.0,
-        'compat_threshold': 2.5,
+        'compat_threshold': 3.0,
 
         'custom_print_fields': ['correct', 'distance'],
         'stats_file' : file_name + '.neat'
@@ -154,13 +154,13 @@ if __name__ == '__main__':
 
     # Show prediction for 1 of the data points
     network.from_hyper_net(organism, substrate_sandwich, model)
-    for x, y in DATA.batch(1):
+    for x, y in DATA.take(5).batch(1):
         predictions = model(x).numpy()
 
-    plt.imshow(x[0])
-    plt.show()
-    plt.imshow(predictions[0])
-    plt.show()
+        plt.imshow(x[0])
+        plt.show()
+        plt.imshow(predictions[0])
+        plt.show()
 
     # Test the CPPN on a larger resolution (27 x 27)
     test_samples = 2

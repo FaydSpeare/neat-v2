@@ -88,13 +88,14 @@ class Species:
 
     def create_offspring(self, amount):
 
+
         offspring = list()
         parent = self.parent_selector()
 
         for _ in range(amount):
 
             # Simply copy parent 25% of the time
-            if random.random() < 0.25:
+            if random.random() < self.config['dup_parent']:
                 offspring.append(next(parent).replicate())
 
             # Crossover parents
